@@ -1,0 +1,74 @@
+{
+  "name": "levelup-game-controller",
+  "version": "1.0.0",
+  "description": "Server project to simulate game-controller server | LevelUp | NodeJs + Socket.io",
+  "main": "index.js",
+  "engines": {
+    "node": "14.15.0"
+  },
+  "scripts": {
+    "build": "babel src --out-dir dist",
+    "dev": "nodemon --exec npx babel-node src/server.js",
+    "format": "prettier-eslint --write $PWD/\"src/**/*.+(js|ts|json|html)\"",
+    "lint": "eslint ./src",
+    "lint:fix": "eslint ./src --fix",
+    "postinstall": "rm -rf dist && npm run build",
+    "pretest": "eslint --ignore-path .gitignore .",
+    "prettify": "npm run format && npm run lint:fix",
+    "release": "release-it patch --no-npm.publish",
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.+(js|ts|json|css|html)": "npm run prettify"
+  },
+  "keywords": [
+    "api",
+    "express",
+    "nodejs",
+    "rest",
+    "socket"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/shark764/levelup-game-controller.git"
+  },
+  "author": "Farid Hernandez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/shark764/levelup-game-controller/issues"
+  },
+  "homepage": "https://gitlab.com/shark764/levelup-game-controller#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "socket.io": "^4.0.1",
+    "socket.io-client": "^4.0.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.13.14",
+    "@babel/core": "^7.13.14",
+    "@babel/node": "^7.13.13",
+    "@babel/preset-env": "^7.13.12",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.2.2",
+    "babel-preset-env": "^1.7.0",
+    "eslint": "^7.23.0",
+    "eslint-plugin-babel": "^5.3.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.3.1",
+    "faker": "^5.5.2",
+    "husky": "^6.0.0",
+    "lint-staged": "^10.5.4",
+    "nodemon": "^2.0.7",
+    "prettier-eslint-cli": "^5.0.1"
+  }
+}
