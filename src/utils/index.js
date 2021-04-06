@@ -1,16 +1,33 @@
-const faker = require('faker');
+import { datatype, date } from 'faker';
 
-const generateHit = (id) => ({
-  client_id: id,
-  device_id: faker.datatype.uuid(),
-  user_id: faker.datatype.uuid(),
-  value_1: faker.datatype.number(),
-  value_2: faker.datatype.number(),
-  value_3: faker.datatype.number(),
-  value_4: faker.datatype.number(),
-  time: faker.date.recent(),
+export const generateHit = (clientId, gameId) => ({
+  clientId,
+  gameId,
+  deviceId: datatype.uuid(),
+  userId: datatype.uuid(),
+  value1: datatype.number(),
+  value2: datatype.number(),
+  value3: datatype.number(),
+  value4: datatype.number(),
+  time: date.recent(),
 });
 
-module.exports = {
-  generateHit,
-};
+export function log(type, msg, ...args) {
+  switch (type) {
+    case 'info':
+      console.log('\x1b[34m%s\x1b[0m', msg, ...args);
+      break;
+    case 'success':
+      console.log('\x1b[35m%s\x1b[0m', msg, ...args);
+      break;
+    case 'warning':
+      console.log('\x1b[33m%s\x1b[0m', msg, ...args);
+      break;
+    case 'error':
+      console.log('\x1b[31m%s\x1b[0m', msg, ...args);
+      break;
+    default:
+      console.log('\x1b[36m%s\x1b[0m', msg, ...args);
+      break;
+  }
+}
