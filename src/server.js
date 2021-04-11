@@ -7,7 +7,7 @@ import addRequestId from 'express-request-id';
 import { generateHit, log } from './utils';
 
 const port = process.env.SOCKET_IO_PORT || 8001;
-// const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'production';
 
 const app = express();
 
@@ -61,8 +61,8 @@ app.get('/greeting', (req, res) => {
   res.json({ message: 'Hola mundo!' });
 });
 
-const SocketIOServer = new Server(httpServer, {
-  path: '/levelup-socket.io',
+const ioServer = new Server(httpServer, {
+  path: '/game-controller-socket.io',
   pingInterval: 10000,
   pingTimeout: 5000,
   cookie: false,
@@ -76,9 +76,9 @@ const SocketIOServer = new Server(httpServer, {
 
 const connectedSocketClients = new Map();
 
-SocketIOServer.on('connection', (socket) => {
+ioServer.on('connection', (socket) => {
   log('info', `Client connected [id=${socket.id}]`);
-  console.log('headers', socket.handshake.headers); // levelup-token-header
+  // console.log('headers', socket.handshake.headers); // levelup-token-header
   const { type } = socket.handshake.query;
   connectedSocketClients.set(socket.id, {
     type,
@@ -90,14 +90,13 @@ SocketIOServer.on('connection', (socket) => {
    */
   socket.on('_game_running-test-data', (data) => {
     console.log('_game_running-test-data', data);
-
-    // socket.emit('_game_event-hit', { data });
+    socket.emit('_game_event-hit', { data });
   });
 
   /**
    * Handle when a new game starts
    */
-  socket.on('_game_event::new-game', () => {
+  socket.on('__device_::_game_event::_new-game', () => {
     log('info', `Client [id=${socket.id}] started a new game`);
     for (const [id, client] of connectedSocketClients.entries()) {
       if (client.type === 'server') {
@@ -106,10 +105,10 @@ SocketIOServer.on('connection', (socket) => {
           player: { name: 'Farid' },
         };
         client.socket.emit(
-          '_game_event-start',
+          '__game_controller_::_game_event::_start',
           { client: id, ...message },
-          (gameId) => {
-            socket.emit('_game_event-started', { gameId });
+          (data) => {
+            socket.emit('__reporting_bff_::_game_event::_started', data);
           }
         );
       }
@@ -119,14 +118,18 @@ SocketIOServer.on('connection', (socket) => {
   /**
    * Handle when a target is hit
    */
-  socket.on('_game_event::target-hit', (data) => {
+  socket.on('__device_::_game_event::_target-hit', (data) => {
     log('success', `Client [id=${socket.id}] sent a hit`);
     for (const [id, client] of connectedSocketClients.entries()) {
       const hit = generateHit(id, data.gameId);
       if (client.type === 'server') {
-        client.socket.emit('_game_event-hit', { client: id, hit }, (data) => {
-          socket.emit('_game_event-hit', { data });
-        });
+        client.socket.emit(
+          '__game_controller_::_game_event::_target-hit',
+          { client: id, hit },
+          (data) => {
+            socket.emit('__reporting_bff_::_game_event::_target-hit', data);
+          }
+        );
       }
     }
   });
@@ -134,14 +137,18 @@ SocketIOServer.on('connection', (socket) => {
   /**
    * Handle when a game has finished
    */
-  socket.on('_game_event::finished', (data) => {
+  socket.on('__device_::_game_event::_end-game', (data) => {
     log('default', `Client [id=${socket.id}] finalized a game`);
     const { gameId } = data;
     for (const [id, client] of connectedSocketClients.entries()) {
       if (client.type === 'server') {
-        client.socket.emit('_game_event-end', { id, gameId }, (data) => {
-          socket.emit('_game_event-finished', data);
-        });
+        client.socket.emit(
+          '__game_controller_::_game_event::_finish',
+          { id, gameId },
+          (data) => {
+            socket.emit('__reporting_bff_::_game_event::_finished', data);
+          }
+        );
       }
     }
   });
