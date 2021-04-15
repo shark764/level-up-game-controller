@@ -4,10 +4,13 @@ import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import addRequestId from 'express-request-id';
-import { generateHit, log } from './utils';
+import { generateHit, getRoomByClientType, log, socketIOPath } from './utils';
+import { whiteList } from './utils/consts';
+import { EVENTS } from './events';
 
-const port = process.env.SOCKET_IO_PORT || 8001;
-const isProduction = process.env.NODE_ENV === 'production';
+// const domain = process.env.DOMAIN || 'localhost';
+const port = process.env.PORT || 8001;
+// const isProduction = process.env.NODE_ENV === 'production';
 
 const app = express();
 
@@ -17,11 +20,7 @@ app.use(addRequestId());
  * Restricting access to server using a whitelist
  */
 const corsOptions = {
-  origin: [
-    /(localhost|127.0.0.1)./,
-    'https://react-socket-io-client-1.herokuapp.com',
-    'https://react-socket-io-client-1.netlify.app',
-  ],
+  origin: whiteList,
   optionsSuccessStatus: 200, // For legacy browser support
 };
 
@@ -62,7 +61,7 @@ app.get('/greeting', (req, res) => {
 });
 
 const ioServer = new Server(httpServer, {
-  path: '/game-controller-socket.io',
+  path: socketIOPath,
   pingInterval: 10000,
   pingTimeout: 5000,
   cookie: false,
@@ -74,91 +73,107 @@ const ioServer = new Server(httpServer, {
   },
 });
 
-const connectedSocketClients = new Map();
-
 ioServer.on('connection', (socket) => {
   log('info', `Client connected [id=${socket.id}]`);
-  // console.log('headers', socket.handshake.headers); // levelup-token-header
+
   const { type } = socket.handshake.query;
-  connectedSocketClients.set(socket.id, {
-    type,
-    socket,
-  });
+  const room = getRoomByClientType(type);
+  if (room) {
+    socket.join(room);
+    log('default', `Client joined room ${room} [id=${socket.id}]`);
+  }
 
   /**
    * Handle when socket client sends data
    */
-  socket.on('_game_running-test-data', (data) => {
+  socket.on('_game_running-test-data', (data, callback) => {
     console.log('_game_running-test-data', data);
     socket.emit('_game_event-hit', { data });
+    callback({
+      status: 'ok',
+    });
   });
 
   /**
    * Handle when a new game starts
    */
-  socket.on('__device_::_game_event::_new-game', () => {
+  socket.on(EVENTS.DEVICE.NEW_GAME, (data, callback) => {
     log('info', `Client [id=${socket.id}] started a new game`);
-    for (const [id, client] of connectedSocketClients.entries()) {
-      if (client.type === 'server') {
-        const message = {
-          game: { name: 'Round #1000' },
-          player: { name: 'Farid' },
-        };
-        client.socket.emit(
-          '__game_controller_::_game_event::_start',
-          { client: id, ...message },
-          (data) => {
-            socket.emit('__reporting_bff_::_game_event::_started', data);
-          }
-        );
-      }
-    }
+
+    const message = {
+      socket: socket.id,
+      payload: { game: { name: 'Round #1000' }, player: { name: 'Farid' } },
+    };
+    ioServer
+      .to('gateway-servers')
+      .emit(EVENTS.GAME_CONTROLLER.START_GAME, message);
+
+    // callback && callback({ status: 'ok' });
   });
 
   /**
    * Handle when a target is hit
    */
-  socket.on('__device_::_game_event::_target-hit', (data) => {
+  socket.on(EVENTS.DEVICE.TARGET_HIT, (data, callback) => {
     log('success', `Client [id=${socket.id}] sent a hit`);
-    for (const [id, client] of connectedSocketClients.entries()) {
-      const hit = generateHit(id, data.gameId);
-      if (client.type === 'server') {
-        client.socket.emit(
-          '__game_controller_::_game_event::_target-hit',
-          { client: id, hit },
-          (data) => {
-            socket.emit('__reporting_bff_::_game_event::_target-hit', data);
-          }
-        );
-      }
-    }
+
+    const message = {
+      socket: socket.id,
+      payload: { hit: generateHit(socket.id, data.gameId) },
+    };
+
+    ioServer
+      .to('gateway-servers')
+      .emit(EVENTS.GAME_CONTROLLER.TARGET_HIT, message);
+
+    // callback && callback({ status: 'ok' });
   });
 
   /**
    * Handle when a game has finished
    */
-  socket.on('__device_::_game_event::_end-game', (data) => {
+  socket.on(EVENTS.DEVICE.END_GAME, (data, callback) => {
     log('default', `Client [id=${socket.id}] finalized a game`);
+
     const { gameId } = data;
-    for (const [id, client] of connectedSocketClients.entries()) {
-      if (client.type === 'server') {
-        client.socket.emit(
-          '__game_controller_::_game_event::_finish',
-          { id, gameId },
-          (data) => {
-            socket.emit('__reporting_bff_::_game_event::_finished', data);
-          }
-        );
-      }
-    }
+    const message = { socket: socket.id, payload: { gameId } };
+
+    ioServer
+      .to('gateway-servers')
+      .emit(EVENTS.GAME_CONTROLLER.FINISH_GAME, message);
+
+    // callback && callback({ status: 'ok' });
+  });
+
+  /**
+   * Messages received from gateway-server
+   * These are responses comming from Reporting BFF
+   */
+  socket.on(EVENTS.GAME_CONTROLLER.GAME_STARTED, (data, callback) => {
+    ioServer.to('devices').emit(EVENTS.DEVICE.GAME_ADDED, data);
+
+    // callback && callback({ status: 'ok' });
+  });
+  socket.on(EVENTS.GAME_CONTROLLER.TARGET_HIT, (data, callback) => {
+    ioServer.to('devices').emit(EVENTS.DEVICE.TARGET_HIT, data);
+
+    // callback && callback({ status: 'ok' });
+  });
+  socket.on(EVENTS.GAME_CONTROLLER.GAME_FINISHED, (data, callback) => {
+    ioServer.to('devices').emit(EVENTS.DEVICE.GAME_ENDED, data);
+
+    // callback && callback({ status: 'ok' });
+  });
+
+  socket.on('disconnecting', () => {
+    log('default', `Client will be disconnect [id=${socket.id}]`, socket.rooms);
   });
 
   /**
    * When socket disconnects, remove it from the list:
    */
   socket.on('disconnect', (reason) => {
-    connectedSocketClients.delete(socket.id);
-    log('warning', `Client gone [id=${socket.id}]`, reason);
+    log('warning', `Client gone [id=${socket.id}]`, reason, socket.rooms);
   });
 });
 
@@ -171,6 +186,6 @@ httpServer.listen({ port }, () => {
   log(
     'success',
     `\nGame Controller Server listening on port ${port} ....`,
-    `\n\tStart date: ${new Date()}`
+    `\n\tStarting timestamp: ${new Date()}`
   );
 });

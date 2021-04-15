@@ -1,5 +1,14 @@
 import { datatype, date } from 'faker';
 
+export const socketIOPath = '/game-controller-socket.io';
+
+const rooms = {
+  'gateway-server': 'gateway-servers',
+  'web-client': 'web-clients',
+  device: 'devices',
+};
+export const getRoomByClientType = (type) => rooms[type];
+
 export const generateHit = (clientId, gameId) => ({
   clientId,
   gameId,

@@ -1,5 +1,5 @@
 {
-  "name": "levelup-game-controller",
+  "name": "level-up-game-controller",
   "version": "1.0.0",
   "description": "Server project to simulate game-controller server | LevelUp | NodeJs + Socket.io",
   "main": "index.js",
@@ -17,7 +17,8 @@
     "prettify": "npm run format && npm run lint:fix",
     "release": "release-it patch --no-npm.publish",
     "start": "node dist/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "heroku-postbuild": "npm install"
   },
   "husky": {
     "hooks": {
@@ -36,14 +37,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://gitlab.com/focus-ventures/levelup-game-controller.git"
+    "url": "git+https://gitlab.com/focus-ventures/level-up-game-controller.git"
   },
   "author": "Farid Hernandez",
   "license": "ISC",
   "bugs": {
-    "url": "https://gitlab.com/focus-ventures/levelup-game-controller/issues"
+    "url": "https://gitlab.com/focus-ventures/level-up-game-controller/issues"
   },
-  "homepage": "https://gitlab.com/focus-ventures/levelup-game-controller#readme",
+  "homepage": "https://gitlab.com/focus-ventures/level-up-game-controller#readme",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
