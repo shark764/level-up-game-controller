@@ -1,6 +1,6 @@
 import { datatype, date } from 'faker';
 
-export const socketIOPath = '/game-controller-socket.io';
+export const socketServerPath = '/game-controller-server';
 
 const rooms = {
   'gateway-server': 'gateway-servers',
