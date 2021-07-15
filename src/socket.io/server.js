@@ -20,22 +20,22 @@ const socketServer = new Server(port, {
   pingInterval: 10000,
   pingTimeout: 5000,
   cookie: false,
-  cors: {
-    ...corsOptions,
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['levelup-token-header'],
-    credentials: true,
-  },
+  // cors: {
+  //   ...corsOptions,
+  //   methods: ['GET', 'POST'],
+  //   allowedHeaders: ['levelup-token-header'],
+  //   credentials: true,
+  // },
 });
 
 const run = () => {
-  if (isDevEnvironment) {
-    log(
-      'success',
-      `\nSocket.IO Server accepting connections at port ${port} ....`,
-      `\nStarting timestamp: ${new Date()}`
-    );
-  }
+  // if (isDevEnvironment) {
+  log(
+    'success',
+    `\nSocket.IO Server accepting connections at port ${port} ....`,
+    `\nStarting timestamp: ${new Date()}`
+  );
+  // }
 
   socketServer.on('connection', (socket) => {
     if (isDevEnvironment) {
