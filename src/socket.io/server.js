@@ -15,20 +15,33 @@ const corsOptions = {
   optionsSuccessStatus: 200, // For legacy browser support
 };
 
-const socketServer = new Server(port, {
-  path: socketServerPath,
-  pingInterval: 10000,
-  pingTimeout: 5000,
-  cookie: false,
-  // cors: {
-  //   ...corsOptions,
-  //   methods: ['GET', 'POST'],
-  //   allowedHeaders: ['levelup-token-header'],
-  //   credentials: true,
-  // },
-});
+let socketServer;
+// const socketServer = new Server(port, {
+//   path: socketServerPath,
+//   pingInterval: 10000,
+//   pingTimeout: 5000,
+//   cookie: false,
+//   cors: {
+//     ...corsOptions,
+//     methods: ['GET', 'POST'],
+//     allowedHeaders: ['levelup-token-header'],
+//     credentials: true,
+//   },
+// });
 
-const run = () => {
+const run = (httpServer) => {
+  socketServer = new Server(httpServer, {
+    path: socketServerPath,
+    pingInterval: 10000,
+    pingTimeout: 5000,
+    cookie: false,
+    cors: {
+      ...corsOptions,
+      methods: ['GET', 'POST'],
+      allowedHeaders: ['levelup-token-header'],
+      credentials: true,
+    },
+  });
   // if (isDevEnvironment) {
   log(
     'success',

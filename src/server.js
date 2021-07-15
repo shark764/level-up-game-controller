@@ -15,11 +15,6 @@ import testRouter from './routes/test.routes';
 
 const port = process.env.PORT || 3011;
 
-/**
- * Start Socket.IO server
- */
-ioServer.run();
-
 const app = express();
 
 app.use(addRequestId());
@@ -57,6 +52,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 const httpServer = createServer(app);
+
+/**
+ * Start Socket.IO server
+ */
+ioServer.run(httpServer);
 
 /**
  * Defining HTTP Endpoint Routes
