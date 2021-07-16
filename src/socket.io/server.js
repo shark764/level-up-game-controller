@@ -16,25 +16,17 @@ const corsOptions = {
 };
 
 let socketServer;
-// const socketServer = new Server(port, {
-//   path: socketServerPath,
-//   pingInterval: 10000,
-//   pingTimeout: 5000,
-//   cookie: false,
-//   cors: {
-//     ...corsOptions,
-//     methods: ['GET', 'POST'],
-//     allowedHeaders: ['levelup-token-header'],
-//     credentials: true,
-//   },
-// });
 
 const run = (httpServer) => {
   socketServer = new Server(httpServer, {
     path: socketServerPath,
-    pingInterval: 10000,
+    pingInterval: 25 * 1000,
     pingTimeout: 5000,
     cookie: false,
+    maxHttpBufferSize: 100000000,
+    connectTimeout: 5000,
+    transports: ['websocket', 'polling'],
+    allowEIO3: true,
     cors: {
       ...corsOptions,
       methods: ['GET', 'POST'],
@@ -42,6 +34,7 @@ const run = (httpServer) => {
       credentials: true,
     },
   });
+
   // if (isDevEnvironment) {
   log(
     'success',
