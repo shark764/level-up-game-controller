@@ -1,8 +1,6 @@
-import ioServer from '../../socket.io/server';
 import { EVENTS as IO_EVENTS } from '../../socket.io/events';
 import { log } from '../../utils';
 
-const { socketServer } = ioServer;
 const isDevEnvironment = process.env.NODE_ENV === 'development';
 
 export const devicesContextUpdate = (req, res, next) => {
@@ -13,6 +11,7 @@ export const devicesContextUpdate = (req, res, next) => {
     );
   }
   try {
+    const { socketServer } = req;
     socketServer
       .to('gateway-servers')
       .emit(IO_EVENTS.GATEWAY_CLIENT.DEVICES_CONTEXT_UPDATE, req.body);
@@ -35,6 +34,7 @@ export const targetUpdate = (req, res, next) => {
     );
   }
   try {
+    const { socketServer } = req;
     socketServer
       .to('gateway-servers')
       .emit(IO_EVENTS.GATEWAY_CLIENT.TARGET_UPDATE, req.body);
@@ -57,6 +57,7 @@ export const targetHit = (req, res, next) => {
     );
   }
   try {
+    const { socketServer } = req;
     socketServer
       .to('gateway-servers')
       .emit(IO_EVENTS.GATEWAY_CLIENT.TARGET_HIT, req.body);
@@ -78,6 +79,7 @@ export const displayUpdate = (req, res, next) => {
     );
   }
   try {
+    const { socketServer } = req;
     socketServer
       .to('gateway-servers')
       .emit(IO_EVENTS.GATEWAY_CLIENT.DISPLAY_UPDATE, req.body);
