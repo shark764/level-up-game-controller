@@ -6,17 +6,17 @@ const port = process.env.PORT || 3011;
 const isDevEnvironment = process.env.NODE_ENV === 'development';
 
 const run = (socketServer) => {
-  // if (isDevEnvironment) {
-  log(
-    'success',
-    `Socket.io Server accepting connections at [port=${port}] [starting timestamp=${new Date()}]`
-  );
-  // }
+  if (isDevEnvironment) {
+    log(
+      'success',
+      `Socket.io Server accepting connections at [port=${port}] [starting timestamp=${new Date()}]`
+    );
+  }
 
   socketServer.on('connection', (socket) => {
-    // if (isDevEnvironment) {
-    log('info', `Client connected [id=${socket.id}]`);
-    // }
+    if (isDevEnvironment) {
+      log('info', `Client connected [id=${socket.id}]`);
+    }
 
     const { type } = socket.handshake.query;
     const room = getRoomByClientType(type);
