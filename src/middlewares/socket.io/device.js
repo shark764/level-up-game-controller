@@ -18,7 +18,7 @@ export const devicesContextUpdate = (req, res, next) => {
     // socketServer.to('devices').emit(IO_EVENTS.DEVICE.HIT_SUCCEEDED, req.body);
   } catch (error) {
     if (isDevEnvironment) {
-      log('error', error);
+      log('error', 'An error ocurred', error);
     }
     // socketServer.to('devices').emit(IO_EVENTS.DEVICE.HIT_FAILED, req.body);
   }
@@ -41,7 +41,7 @@ export const targetUpdate = (req, res, next) => {
     // socketServer.to('devices').emit(IO_EVENTS.DEVICE.HIT_SUCCEEDED, req.body);
   } catch (error) {
     if (isDevEnvironment) {
-      log('error', error);
+      log('error', 'An error ocurred', error);
     }
     // socketServer.to('devices').emit(IO_EVENTS.DEVICE.HIT_FAILED, req.body);
   }
@@ -64,7 +64,7 @@ export const targetHit = (req, res, next) => {
     // socketServer.to('devices').emit(IO_EVENTS.DEVICE.HIT_SUCCEEDED, req.body);
   } catch (error) {
     if (isDevEnvironment) {
-      log('error', error);
+      log('error', 'An error ocurred', error);
     }
     // socketServer.to('devices').emit(IO_EVENTS.DEVICE.HIT_FAILED, req.body);
   }
@@ -86,7 +86,7 @@ export const displayUpdate = (req, res, next) => {
     // socketServer.to('devices').emit(IO_EVENTS.DEVICE.HIT_SUCCEEDED, req.body);
   } catch (error) {
     if (isDevEnvironment) {
-      log('error', error);
+      log('error', 'An error ocurred', error);
     }
     // socketServer.to('devices').emit(IO_EVENTS.DEVICE.HIT_FAILED, req.body);
   }
