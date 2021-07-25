@@ -130,7 +130,7 @@ const run = (socketServer) => {
 
     /**
      * 1.3 ) WebSocket Service Commands
-     * Commands comming from reporting server through gateway
+     * Commands coming from reporting server through gateway
      */
     // Delete all device and event log data in the server database.
     socket.on(IO_EVENTS.GATEWAY_CLIENT.RESET_DATA, () => {

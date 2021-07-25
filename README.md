@@ -1,6 +1,6 @@
 # Level Up - Game Controller `Fake` Server
 
-Server made with Javascript technologies to test Socket.IO messages comming from Game Controller
+Server made with Javascript technologies to test Socket.IO messages coming from Game Controller
 
 ## Installation
 
